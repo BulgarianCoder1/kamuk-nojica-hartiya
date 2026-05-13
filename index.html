@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Камък Ножица Хартия</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            margin: 0;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            min-height: 100vh;
+        }
+        h1 {
+            font-size: 42px;
+            margin: 20px 0 10px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .scores {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            font-size: 22px;
+            margin: 20px 0;
+        }
+        .game-area {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+        .choice {
+            font-size: 90px;
+            margin: 20px 0;
+            min-height: 120px;
+            transition: all 0.4s;
+        }
+        button {
+            font-size: 26px;
+            padding: 18px 32px;
+            margin: 10px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+        button:hover {
+            transform: scale(1.12);
+        }
+        .rock { background: #e74c3c; }
+        .paper { background: #3498db; }
+        .scissors { background: #2ecc71; }
+        .result {
+            font-size: 34px;
+            margin: 25px 0;
+            min-height: 60px;
+            font-weight: bold;
+        }
+        .reset {
+            background: #f1c40f;
+            color: black;
+            font-size: 18px;
+            padding: 12px 30px;
+        }
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <h1>✊ Камък Ножица Хартия ✌️</h1>
+    
+    <div class="scores">
+        <div>Ти: <strong id="player-score">0</strong></div>
+        <div>Компютър: <strong id="computer-score">0</strong></div>
+        <div>Най-добър: <strong id="high-score">0</strong></div>
+    </div>
+
+    <div class="game-area">
+        <div>
+            <h2>Ти</h2>
+            <div class="choice" id="player-choice">❓</div>
+        </div>
+        <div>
+            <h2>Компютър</h2>
+            <div class="choice" id="computer-choice">❓</div>
+        </div>
+    </div>
+
+    <div class="result" id="result">Избери своя ход!</div>
+
+    <div>
+        <button class="rock" onclick="play('rock')">✊ Камък</button>
+        <button class="paper" onclick="play('paper')">✋ Хартия</button>
+        <button class="scissors" onclick="play('scissors')">✌️ Ножица</button>
+    </div>
+
+    <br><br>
+    <button class="reset" onclick="resetGame()">🔄 Нулирай резултати</button>
+
+    <canvas id="confetti"></canvas>
+
+    <script>
+        let playerScore = 0;
+        let computerScore = 0;
+        let highScore = 0;
+
+        const choices = { rock: "✊", paper: "✋", scissors: "✌️" };
+
+        function play(playerChoice) {
+            const playerDiv = document.getElementById('player-choice');
+            const computerDiv = document.getElementById('computer-choice');
+            const resultDiv = document.getElementById('result');
+
+            playerDiv.style.transform = "scale(0.7)";
+            setTimeout(() => playerDiv.style.transform = "scale(1)", 200);
+
+            const options = ['rock', 'paper', 'scissors'];
+            const computerChoice = options[Math.floor(Math.random() * 3)];
+
+            playerDiv.textContent = choices[playerChoice];
+            computerDiv.textContent = "🤔";
+            resultDiv.textContent = "Компютърът мисли...";
+
+            setTimeout(() => {
+                computerDiv.textContent = choices[computerChoice];
+                
+                const winner = getWinner(playerChoice, computerChoice);
+                
+                if (winner === "player") {
+                    playerScore++;
+                    resultDiv.innerHTML = `🎉 <span style="color:#2ecc71">Ти печелиш!</span>`;
+                    launchConfetti();
+                } else if (winner === "computer") {
+                    computerScore++;
+                    resultDiv.innerHTML = `😢 <span style="color:#e74c3c">Компютърът печели!</span>`;
+                } else {
+                    resultDiv.innerHTML = `🤝 <span style="color:#f1c40f">Равенство!</span>`;
+                }
+
+                document.getElementById('player-score').textContent = playerScore;
+                document.getElementById('computer-score').textContent = computerScore;
+
+                // Обновяване на High Score
+                if (playerScore > highScore) {
+                    highScore = playerScore;
+                    document.getElementById('high-score').textContent = highScore;
+                }
+            }, 700);
+        }
+
+        function getWinner(p, c) {
+            if (p === c) return "draw";
+            if ((p === "rock" && c === "scissors") ||
+                (p === "paper" && c === "rock") ||
+                (p === "scissors" && c === "paper")) return "player";
+            return "computer";
+        }
+
+        function launchConfetti() {
+            const canvas = document.getElementById('confetti');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particles = [];
+            for (let i = 0; i < 150; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 10 + 5,
+                    speed: Math.random() * 6 + 3,
+                    color: ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f'][Math.floor(Math.random()*4)]
+                });
+            }
+
+            let animation = setInterval(() => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    let p = particles[i];
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(p.x, p.y, p.size, p.size);
+                    p.y += p.speed;
+                    if (p.y > canvas.height) particles.splice(i, 1);
+                }
+                if (particles.length === 0) {
+                    clearInterval(animation);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }, 20);
+        }
+
+        function resetGame() {
+            if (confirm("Сигурен ли си, че искаш да нулираш всички резултати?")) {
+                playerScore = 0;
+                computerScore = 0;
+                highScore = 0;
+                document.getElementById('player-score').textContent = 0;
+                document.getElementById('computer-score').textContent = 0;
+                document.getElementById('high-score').textContent = 0;
+                document.getElementById('player-choice').textContent = "❓";
+                document.getElementById('computer-choice').textContent = "❓";
+                document.getElementById('result').textContent = "Избери своя ход!";
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('confetti');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
