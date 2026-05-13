@@ -27,9 +27,6 @@
 - CSS
 - JavaScript (без никакви библиотеки)
 
-## Опитай я
-
-👉 **[Играй тук](https://BulgarianCoder1.github.io/kamuk-nojica-hartiya/)**
 
 ---
 
